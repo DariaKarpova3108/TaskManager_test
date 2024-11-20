@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class TaskCommentCreateDTO {
 
-    @NotNull(message = "Укажите автора комментария")
+    @NotNull(message = "Id автора комментария должен содержать значение")
     @JsonProperty("author_id")
     private Long authorId;
 
@@ -22,7 +22,7 @@ public class TaskCommentCreateDTO {
     @JsonProperty("description")
     private String description;
 
-    @NotNull(message = "Укажите id задачи")
+    @NotNull(message = "Id задачи должен содержать значение")
     @JsonProperty("task_id")
     private Long taskId;
 }
