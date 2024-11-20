@@ -5,12 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "task_priorities")
@@ -27,4 +31,7 @@ public class TaskPriority implements BaseEntity {
     @Column(name = "priority_name", nullable = false, unique = true)
     @Size(max = 50)
     private String priorityName;
+
+    @OneToMany(mappedBy = "priority")
+    private List<Task> listTasks = new ArrayList<>(); //добавила для проверки доп логики в сервисе
 }

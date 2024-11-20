@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface TaskPriorityRepository extends JpaRepository<TaskPriority, Long> {
     Optional<TaskPriority> findByPriorityName(String priorityName);
+    boolean existsByPriorityName(String priorityName);
 }
