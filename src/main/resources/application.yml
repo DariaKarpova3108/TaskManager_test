@@ -12,3 +12,7 @@ spring:
 
 server:
   port: 7070
+
+rsa:
+  private-key: classpath:certs/private.pem
+  public-key: classpath:certs/public.pem

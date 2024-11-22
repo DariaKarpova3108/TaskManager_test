@@ -29,8 +29,6 @@ public class UserUpdateDTO {
     @NotNull(message = "Пароль не может состоять из 0 символов")
     private JsonNullable<String> password;
 
-    //    @JsonProperty("role")
-//    private JsonNullable<RoleDTO> role;
     @JsonProperty("roles")
     @NotNull(message = "Укажите хотя бы одну роль")
     private JsonNullable<Set<RoleDTO>> roles;

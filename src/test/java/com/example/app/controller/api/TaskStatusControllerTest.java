@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -24,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
-//import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,13 +47,10 @@ public class TaskStatusControllerTest {
     private ModelGenerator modelGenerator;
     private TaskStatus taskStatusModel;
 
-    //позже подключить безопасность и добавить поле с токеном и логику проверки ролей и токена
-
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
-                // .apply(SecurityMockMvcConfigurers.springSecurity())  //позже подключить безопасность
                 .build();
 
         taskStatusModel = Instancio.of(modelGenerator.getStatusModel()).create();
@@ -68,6 +65,7 @@ public class TaskStatusControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetListStatuses() throws Exception {
         var request = get("/api/statuses");
         var result = mockMvc.perform(request)
@@ -81,6 +79,7 @@ public class TaskStatusControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetStatus() throws Exception {
         var request = get("/api/statuses/" + taskStatusModel.getId());
         var result = mockMvc.perform(request)

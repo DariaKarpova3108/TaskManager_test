@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -24,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
-//import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,13 +47,10 @@ public class TaskPriorityControllerTest {
     private ModelGenerator modelGenerator;
     private TaskPriority priorityModel;
 
-    //позже подключить безопасность и добавить поле с токеном и логику проверки ролей и токена
-
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
-                // .apply(SecurityMockMvcConfigurers.springSecurity())  //позже подключить безопасность
                 .build();
 
         priorityModel = Instancio.of(modelGenerator.getPriorityModel()).create();
@@ -68,6 +65,7 @@ public class TaskPriorityControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetListPriority() throws Exception {
         var request = get("/api/priority");
         var result = mockMvc.perform(request)
@@ -80,6 +78,7 @@ public class TaskPriorityControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetPriority() throws Exception {
         var request = get("/api/priority/" + priorityModel.getId());
         var result = mockMvc.perform(request)
@@ -93,6 +92,7 @@ public class TaskPriorityControllerTest {
 
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testCreatePriority() throws Exception {
         var createDTO = new TaskPriorityCreateDTO();
         createDTO.setPriorityName("test");
@@ -112,6 +112,7 @@ public class TaskPriorityControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testUpdatePriority() throws Exception {
         var updateDTO = new TaskPriorityUpdateDTO();
         updateDTO.setPriorityName(JsonNullable.of("test2"));
@@ -131,6 +132,7 @@ public class TaskPriorityControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testDeletePriority() throws Exception {
         var request = delete("/api/priority/" + priorityModel.getId());
         mockMvc.perform(request)

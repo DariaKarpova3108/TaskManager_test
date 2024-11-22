@@ -28,6 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -39,6 +42,7 @@ import java.util.Set;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,15 +76,13 @@ public class TaskCommentControllerTest {
     private TaskComment commentModel;
     private User userModel;
     private Task taskModel;
-
-    //позже подключить безопасность и добавить поле с токеном и логику проверки ролей и токена
-    //
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
-                // .apply(SecurityMockMvcConfigurers.springSecurity())  //позже подключить безопасность
+                .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
 
         Role defaultRole = roleRepository.findByRoleName(RoleName.USER)
@@ -107,6 +109,8 @@ public class TaskCommentControllerTest {
         commentModel.setAuthor(userModel);
         commentModel.setTask(taskModel);
         commentRepository.save(commentModel);
+
+        token = jwt().jwt(builder -> builder.subject(userModel.getEmail()));
     }
 
     @AfterEach
@@ -119,7 +123,8 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    public void testGetListComments() throws Exception {
+    @WithMockUser(roles = {"ADMIN", "USER"})
+    public void testGetListTaskComments() throws Exception {
         var request = get("/api/tasks/" + taskModel.getId() + "/comments");
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
@@ -131,7 +136,8 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    public void testGetComment() throws Exception {
+    @WithMockUser(roles = {"ADMIN", "USER"})
+    public void testGetTaskComment() throws Exception {
         var request = get("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId());
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
@@ -144,13 +150,14 @@ public class TaskCommentControllerTest {
 
 
     @Test
-    public void testCreateComment() throws Exception {
+    public void testCreateTaskComment() throws Exception {
         var createDTO = new TaskCommentCreateDTO();
         createDTO.setTitle("newTitle");
-        createDTO.setAuthorId(userModel.getId());
+        createDTO.setAuthorId(userModel.getId()); //????
         createDTO.setDescription("text");
 
         var request = post("/api/tasks/" + taskModel.getId() + "/comments")
+                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO));
 
@@ -168,11 +175,12 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    public void testUpdateComment() throws Exception {
+    public void testUpdateTaskComment() throws Exception {
         var updateDTO = new TaskCommentUpdateDTO();
         updateDTO.setTitle(JsonNullable.of("updatedTitle"));
 
         var request = put("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId())
+                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO));
 
@@ -189,8 +197,9 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    public void testDeleteComment() throws Exception {
-        var request = delete("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId());
+    public void testDeleteTaskComment() throws Exception {
+        var request = delete("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId())
+                .with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
 

@@ -49,6 +49,8 @@ public class ModelGenerator {
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
                 .ignore(Select.field(User::getRoles))
+                .ignore(Select.field(User::getTasksAsAuthor))
+                .ignore(Select.field(User::getTasksAsAssignee))
                 .toModel();
 
         commentModel = Instancio.of(TaskComment.class)

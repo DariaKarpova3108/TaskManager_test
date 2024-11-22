@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -29,7 +32,7 @@ import java.util.Set;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
-//import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -59,14 +62,13 @@ public class TaskControllerTest {
     @Autowired
     private RoleRepository roleRepository;
     private Task taskModel;
-
-    //позже подключить безопасность и добавить поле с токеном и логику проверки ролей и токена и РОЛЯМИ
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
-                //  .apply(SecurityMockMvcConfigurers.springSecurity())
+                .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
 
         var defaultRole = roleRepository.findByRoleName(RoleName.USER)
@@ -91,7 +93,10 @@ public class TaskControllerTest {
         taskModel.setPriority(priority);
         taskModel.setStatus(status);
         taskRepository.save(taskModel);
+
+        token = jwt().jwt(builder -> builder.subject(assignee.getEmail()));
     }
+
     @AfterEach
     public void cleanUp() {
         taskRepository.deleteAll();
@@ -101,6 +106,7 @@ public class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testGetListTasks() throws Exception {
         var request = get("/api/tasks");
         var result = mockMvc.perform(request)
@@ -114,6 +120,7 @@ public class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetTask() throws Exception {
         var request = get("/api/tasks/" + taskModel.getId());
         var result = mockMvc.perform(request)
@@ -130,6 +137,7 @@ public class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testCreateTask() throws Exception {
         var statusTask = statusRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Status not found"));
@@ -173,6 +181,7 @@ public class TaskControllerTest {
         updateDTO.setTitle(JsonNullable.of("title2"));
 
         var request = put("/api/tasks/" + taskModel.getId())
+                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO));
 
@@ -192,7 +201,8 @@ public class TaskControllerTest {
 
     @Test
     public void testDeleteTask() throws Exception {
-        var request = delete("/api/tasks/" + taskModel.getId());
+        var request = delete("/api/tasks/" + taskModel.getId())
+                .with(token);
 
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());

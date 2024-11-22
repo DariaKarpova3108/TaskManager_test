@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,8 +36,7 @@ public class UserService {
     public UserDTO createUser(UserCreateDTO createDTO) {
         var model = userMapper.map(createDTO);
         var role = roleRepository.findByRoleName(RoleName.USER)
-                        .orElseThrow(() -> new ResourceNotFoundException("Default role USER not found"));
-       // model.setRoles(Set.of(role));
+                .orElseThrow(() -> new ResourceNotFoundException("Default role USER not found"));
         model.getRoles().add(role);
         userRepository.save(model);
         return userMapper.map(model);

@@ -1,6 +1,5 @@
 package com.example.app.controller.api;
 
-import com.example.app.dto.role.RoleDTO;
 import com.example.app.dto.user.UserCreateDTO;
 import com.example.app.dto.user.UserUpdateDTO;
 import com.example.app.exception.ResourceNotFoundException;
@@ -21,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,14 +33,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-//import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,23 +61,27 @@ public class UserControllerTest {
     @Autowired
     private RoleMapper roleMapper;
     private User userModel;
-
-    //позже подключить безопасность и добавить поле с токеном и логику проверки ролей и токена И РОЛИ
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
-                // .apply(SecurityMockMvcConfigurers.springSecurity())  //позже подключить безопасность
+                .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
 
         userModel = Instancio.of(modelGenerator.getUserModel()).create();
+        userModel.setEmail("user@example.com");
 
         Role role = roleRepository.findByRoleName(RoleName.USER)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
         userModel.setRoles(new HashSet<>(Set.of(role)));
         userRepository.save(userModel);
+
+        assertThat(userRepository.findByEmail(userModel.getEmail())).isPresent();
+
+        token = jwt().jwt(builder -> builder.subject(userModel.getEmail()));
     }
 
     @AfterEach
@@ -86,6 +92,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetListUsers() throws Exception {
         var request = get("/api/users");
         var result = mockMvc.perform(request)
@@ -99,8 +106,10 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetUser() throws Exception {
-        var request = get("/api/users/" + userModel.getId());
+        var request = get("/api/users/" + userModel.getId())
+                .with(token);
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
@@ -116,6 +125,7 @@ public class UserControllerTest {
 
     @Test
     @Transactional
+  //  @WithMockUser(roles = {"ADMIN"})
     public void testCreateUser() throws Exception {
         var createDTO = new UserCreateDTO();
         createDTO.setFirstName("lili");
@@ -124,6 +134,7 @@ public class UserControllerTest {
         createDTO.setPassword("qwerty");
 
         var request = post("/api/users")
+                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO));
 
@@ -141,35 +152,9 @@ public class UserControllerTest {
         assertThat(savedUser.get().getEmail()).isEqualTo(createDTO.getEmail());
     }
 
-//    @Test
-//    @Transactional
-//    public void testUpdateUser() throws Exception {
-//        var roleAdmin = roleRepository.findByRoleName(RoleName.ADMIN)
-//                .orElseThrow(() -> new ResourceNotFoundException("Role ADMIN not found"));
-//
-//        var updateDTO = new UserUpdateDTO();
-//        updateDTO.setRole(JsonNullable.of(roleMapper.map(roleAdmin)));
-//        updateDTO.setFirstName(JsonNullable.of("newName"));
-//
-//
-//        var request = put("/api/users/" + userModel.getId())
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(updateDTO));
-//
-//        mockMvc.perform(request)
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        var updatedUser = userRepository.findById(userModel.getId());
-//
-//        assertThat(updatedUser).isPresent();
-//
-//        assertThat(updatedUser.get().getFirstName()).isEqualTo(updateDTO.getFirstName().get());
-//        assertThat(updatedUser.get().getRoles().size()).isEqualTo(2);
-//    }
-
     @Test
     @Transactional
+  //  @WithMockUser(roles = {"ADMIN"})
     public void testUpdateUser() throws Exception {
         var roleAdmin = roleRepository.findByRoleName(RoleName.ADMIN)
                 .orElseThrow(() -> new ResourceNotFoundException("Role ADMIN not found"));
@@ -183,6 +168,7 @@ public class UserControllerTest {
 
 
         var request = put("/api/users/" + userModel.getId())
+                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO));
 
@@ -199,8 +185,10 @@ public class UserControllerTest {
     }
 
     @Test
+  //  @WithMockUser(roles = {"ADMIN"})
     public void testDeleteUser() throws Exception {
-        var request = delete("/api/users/" + userModel.getId());
+        var request = delete("/api/users/" + userModel.getId())
+                .with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
 
