@@ -22,8 +22,4 @@ public class TaskCommentUpdateDTO {
     @JsonProperty("description")
     @NotNull(message = "Описание комментария не может быть пустым")
     private JsonNullable<String> description;
-
-    @JsonProperty("task_id")
-    @NotNull(message = "Id задачи должен содержать значение")
-    private JsonNullable<Long> taskId;
 }

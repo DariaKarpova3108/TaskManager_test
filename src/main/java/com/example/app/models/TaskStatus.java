@@ -3,6 +3,7 @@ package com.example.app.models;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,12 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "task_statuses")
+@Table
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString
+@ToString(exclude = "listTasks")
 public class TaskStatus implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +36,6 @@ public class TaskStatus implements BaseEntity {
     @Size(max = 50)
     private String name;
 
-    @OneToMany(mappedBy = "status")
+    @OneToMany(mappedBy = "status", fetch = FetchType.LAZY)
     private List<Task> listTasks = new ArrayList<>(); //добавила для проверки доп логики в сервисе
 }

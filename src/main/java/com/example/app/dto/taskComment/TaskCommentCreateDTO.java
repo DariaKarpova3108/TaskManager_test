@@ -21,8 +21,4 @@ public class TaskCommentCreateDTO {
     @NotNull(message = "Описание комментария не может быть пустым")
     @JsonProperty("description")
     private String description;
-
-    @NotNull(message = "Id задачи должен содержать значение")
-    @JsonProperty("task_id")
-    private Long taskId;
 }

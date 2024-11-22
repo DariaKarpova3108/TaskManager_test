@@ -21,40 +21,43 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/tasks/{taskId}/comments")
 @RequiredArgsConstructor
 public class TaskCommentController {
     private final TaskCommentService commentService;
 
     @GetMapping
-    public ResponseEntity<List<TaskCommentDTO>> getListTaskComments() {
+    public ResponseEntity<List<TaskCommentDTO>> getListTaskComments(@PathVariable Long taskId) {
         return ResponseEntity.ok()
-                .header("X-Total-Count", String.valueOf(commentService.getAllComments().size()))
-                .body(commentService.getAllComments());
+                .header("X-Total-Count",
+                        String.valueOf(commentService.getAllCommentsForTask(taskId).size()))
+                .body(commentService.getAllCommentsForTask(taskId));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TaskCommentDTO getTaskComments(@PathVariable Long id) {
-        return commentService.getComment(id);
+    public TaskCommentDTO getTaskComments(@PathVariable Long taskId, @PathVariable Long id) {
+        return commentService.getCommentForTask(taskId, id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskCommentDTO createTaskComments(@RequestBody @Valid TaskCommentCreateDTO createDTO) {
-        return commentService.createComment(createDTO);
+    public TaskCommentDTO createTaskComments(@PathVariable Long taskId,
+                                             @RequestBody @Valid TaskCommentCreateDTO createDTO) {
+        return commentService.createCommentForTask(taskId, createDTO);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TaskCommentDTO updateTaskComments(@RequestBody @Valid TaskCommentUpdateDTO updateDTO,
+    public TaskCommentDTO updateTaskComments(@PathVariable Long taskId,
+                                             @RequestBody @Valid TaskCommentUpdateDTO updateDTO,
                                           @PathVariable Long id) {
-        return commentService.updateComment(updateDTO, id);
+        return commentService.updateCommentForTask(taskId, updateDTO, id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTaskComments(@PathVariable Long id) {
-        commentService.deleteComment(id);
+    public void deleteTaskComments(@PathVariable Long taskId, @PathVariable Long id) {
+        commentService.deleteCommentForTask(taskId, id);
     }
 }

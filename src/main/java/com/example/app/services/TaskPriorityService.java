@@ -51,8 +51,11 @@ public class TaskPriorityService {
     public void deletePriority(Long id) {
         var model = priorityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task priority with id: " + id + " not found"));
+
         if (!model.getListTasks().isEmpty()) {
             throw new LinkingTasksToAnotherEntityException("Task priority cannot be deleted, they have assigned tasks");
         }
+
+        priorityRepository.deleteById(id);
     }
 }

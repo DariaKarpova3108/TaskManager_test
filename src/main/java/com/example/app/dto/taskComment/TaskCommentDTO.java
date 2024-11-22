@@ -23,9 +23,6 @@ public class TaskCommentDTO {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("task_id")
-    private Long taskId;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdAt;
 

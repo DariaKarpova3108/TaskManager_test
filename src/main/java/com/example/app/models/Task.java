@@ -55,7 +55,7 @@ public class Task implements BaseEntity {
     @JoinColumn(name = "priority_id", referencedColumnName = "id", nullable = false)
     private TaskPriority priority;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TaskComment> taskComments = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

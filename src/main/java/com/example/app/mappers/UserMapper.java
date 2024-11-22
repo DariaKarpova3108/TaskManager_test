@@ -6,6 +6,7 @@ import com.example.app.dto.user.UserDTO;
 import com.example.app.dto.user.UserUpdateDTO;
 import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.models.Role;
+import com.example.app.models.RoleName;
 import com.example.app.models.User;
 import com.example.app.repositories.RoleRepository;
 import org.mapstruct.Mapper;
@@ -39,6 +40,7 @@ public abstract class UserMapper {
     public abstract UserDTO map(User model);
 
     @Mapping(target = "passwordDigest", source = "password")
+    //@Mapping(target = "roles", source = "role", qualifiedByName = "updateRoles")
     @Mapping(target = "roles", source = "roles", qualifiedByName = "updateRoles")
     public abstract void update(UserUpdateDTO updateDTO, @MappingTarget User model);
 
@@ -56,4 +58,20 @@ public abstract class UserMapper {
         }
         return updateRoles;
     }
+
+//    @Named("updateRoles")
+//    public Set<Role> updateRoles(JsonNullable<RoleDTO> roleDTO) {
+//        var defaultRoleUser = roleRepository.findByRoleName(RoleName.USER).
+//                orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+//        Set<Role> updateRoles = new HashSet<>();
+//        updateRoles.add(defaultRoleUser);
+//        if (roleDTO.isPresent()) {
+//            RoleDTO newRoleDTO = roleDTO.get();
+//            Role newRole = roleRepository.findByRoleName(newRoleDTO.getRoleName())
+//                    .orElseThrow(() -> new ResourceNotFoundException("Role with name: " + newRoleDTO.getRoleName() +
+//                            " not found"));
+//            updateRoles.add(newRole);
+//        }
+//        return updateRoles;
+//    }
 }

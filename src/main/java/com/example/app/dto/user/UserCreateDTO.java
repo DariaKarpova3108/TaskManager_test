@@ -1,13 +1,10 @@
 package com.example.app.dto.user;
 
-import com.example.app.dto.role.RoleDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -30,8 +27,4 @@ public class UserCreateDTO {
     @NotNull(message = "Email не должен быть пустым")
     @JsonProperty("email")
     private String email;
-
-    @NotNull(message = "Укажите хотя бы одну роль")
-    @JsonProperty("roles")
-    private Set<RoleDTO> roles;
 }
