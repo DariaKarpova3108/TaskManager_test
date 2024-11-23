@@ -3,6 +3,7 @@ package com.example.app.services;
 import com.example.app.dto.task.TaskCreateDTO;
 import com.example.app.dto.task.TaskDTO;
 import com.example.app.dto.task.TaskUpdateDTO;
+import com.example.app.dto.task.TaskUpdateForAssigneeDTO;
 import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.mappers.TaskMapper;
 import com.example.app.repositories.TaskRepository;
@@ -40,6 +41,14 @@ public class TaskService {
         var model = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + id + " not found"));
         taskMapper.update(updateDTO, model);
+        taskRepository.save(model);
+        return taskMapper.map(model);
+    }
+
+    public TaskDTO updateTaskForAssignee(TaskUpdateForAssigneeDTO updateForAssigneeDTO, Long id) {
+        var model = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + id + " not found"));
+        taskMapper.updateForAssignee(updateForAssigneeDTO, model);
         taskRepository.save(model);
         return taskMapper.map(model);
     }

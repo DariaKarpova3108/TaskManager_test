@@ -3,9 +3,9 @@ package com.example.app.mappers;
 import com.example.app.dto.task.TaskCreateDTO;
 import com.example.app.dto.task.TaskDTO;
 import com.example.app.dto.task.TaskUpdateDTO;
+import com.example.app.dto.task.TaskUpdateForAssigneeDTO;
 import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.models.Task;
-import com.example.app.models.TaskComment;
 import com.example.app.models.TaskPriority;
 import com.example.app.models.TaskStatus;
 import com.example.app.models.User;
@@ -21,9 +21,6 @@ import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(
         uses = {JsonNullableMapper.class, ReferenceMapper.class, TaskCommentMapper.class},
@@ -41,7 +38,6 @@ public abstract class TaskMapper {
     @Autowired
     private UserRepository userRepository;
 
-
     @Mapping(target = "status", source = "status", qualifiedByName = "toModelTaskStatus")
     @Mapping(target = "priority", source = "priority", qualifiedByName = "toModelTaskPriority")
     @Mapping(target = "author", source = "authorId", qualifiedByName = "findUserById")
@@ -56,10 +52,10 @@ public abstract class TaskMapper {
 
     @Mapping(target = "status", source = "status", qualifiedByName = "toModelTaskStatus")
     @Mapping(target = "priority", source = "priority", qualifiedByName = "toModelTaskPriority")
-    @Mapping(target = "taskComments", source = "taskCommentsId", qualifiedByName = "toModelTaskComments")
-    @Mapping(target = "author", source = "authorId", qualifiedByName = "findUserById")
     @Mapping(target = "assignee", source = "assigneeId", qualifiedByName = "findUserById")
     public abstract void update(TaskUpdateDTO updateDTO, @MappingTarget Task model);
+    @Mapping(target = "status", source = "status", qualifiedByName = "toModelTaskStatus")
+    public abstract void updateForAssignee(TaskUpdateForAssigneeDTO updateForAssigneeDTO, @MappingTarget Task model);
 
     @Named("toModelTaskStatus")
     public TaskStatus toModelTaskStatus(String status) {
@@ -77,14 +73,5 @@ public abstract class TaskMapper {
     public User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id: " + id + " not found"));
-    }
-
-    @Named("toModelTaskComments")
-    public List<TaskComment> toModelTaskComments(List<Long> taskCommentsId) {
-        return taskCommentsId.stream()
-                .distinct()
-                .map(id -> taskCommentRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("task comment with id: " + id + " not found")))
-                .collect(Collectors.toList());
     }
 }

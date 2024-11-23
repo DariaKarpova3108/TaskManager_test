@@ -3,9 +3,18 @@ package com.example.app.controller.api;
 import com.example.app.dto.task.TaskCreateDTO;
 import com.example.app.dto.task.TaskDTO;
 import com.example.app.dto.task.TaskUpdateDTO;
+import com.example.app.dto.task.TaskUpdateForAssigneeDTO;
 import com.example.app.exception.ResourceNotFoundException;
-import com.example.app.models.*;
-import com.example.app.repositories.*;
+import com.example.app.models.RoleName;
+import com.example.app.models.Task;
+import com.example.app.models.TaskPriority;
+import com.example.app.models.TaskStatus;
+import com.example.app.models.User;
+import com.example.app.repositories.RoleRepository;
+import com.example.app.repositories.TaskPriorityRepository;
+import com.example.app.repositories.TaskRepository;
+import com.example.app.repositories.TaskStatusRepository;
+import com.example.app.repositories.UserRepository;
 import com.example.app.util.ModelGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.Instancio;
@@ -176,6 +185,7 @@ public class TaskControllerTest {
 
     @Test
     @Transactional
+    @WithMockUser(roles = {"ADMIN"})
     public void testUpdateTask() throws Exception {
         var updateDTO = new TaskUpdateDTO();
         updateDTO.setTitle(JsonNullable.of("title2"));
@@ -199,10 +209,40 @@ public class TaskControllerTest {
         assertThat(updatedTask.getAuthor().getEmail()).isEqualTo(taskModel.getAuthor().getEmail());
     }
 
+
     @Test
+    @Transactional
+    public void testUpdateTaskForAssignee() throws Exception {
+        var newStatus = Instancio.of(modelGenerator.getStatusModel()).create();
+        statusRepository.save(newStatus);
+
+        var updateDTO = new TaskUpdateForAssigneeDTO();
+        updateDTO.setTitle(JsonNullable.of("titleUpdate"));
+        updateDTO.setStatus(JsonNullable.of(newStatus.getName()));
+
+        var request = put("/api/tasks/" + taskModel.getId() + "/assignee-update")
+                .with(token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO));
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var updatedTask = taskRepository.findById(taskModel.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + taskModel.getId() + " not found"));
+
+        assertThat(updatedTask.getTitle()).isEqualTo("titleUpdate");
+        assertThat(updatedTask.getDescription()).isEqualTo(taskModel.getDescription());
+        assertThat(updatedTask.getStatus().getName()).isEqualTo(taskModel.getStatus().getName());
+        assertThat(updatedTask.getPriority().getPriorityName()).isEqualTo(taskModel.getPriority().getPriorityName());
+        assertThat(updatedTask.getAuthor().getEmail()).isEqualTo(taskModel.getAuthor().getEmail());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testDeleteTask() throws Exception {
-        var request = delete("/api/tasks/" + taskModel.getId())
-                .with(token);
+        var request = delete("/api/tasks/" + taskModel.getId());
 
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());

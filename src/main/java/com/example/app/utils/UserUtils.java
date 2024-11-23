@@ -24,8 +24,8 @@ public class UserUtils {
 
         var currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User with email: " + email + " not found"));
-        boolean result = currentUser.getId().equals(id);
-        return result;
+
+        return  currentUser.getId().equals(id);
     }
 }
 

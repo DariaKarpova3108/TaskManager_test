@@ -55,7 +55,7 @@ public class TaskCommentController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isAssigneeOrAdmin(#id, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isCommentAuthor(#id, principal)")
     public TaskCommentDTO updateTaskComments(@PathVariable Long taskId,
                                              @RequestBody @Valid TaskCommentUpdateDTO updateDTO,
                                           @PathVariable Long id) {
@@ -64,7 +64,7 @@ public class TaskCommentController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isAssigneeOrAdmin(#id, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isCommentAuthor(#id, principal)")
     public void deleteTaskComments(@PathVariable Long taskId, @PathVariable Long id) {
         commentService.deleteCommentForTask(taskId, id);
     }

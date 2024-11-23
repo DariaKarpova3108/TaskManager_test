@@ -3,6 +3,7 @@ package com.example.app.controllers.api;
 import com.example.app.dto.task.TaskCreateDTO;
 import com.example.app.dto.task.TaskDTO;
 import com.example.app.dto.task.TaskUpdateDTO;
+import com.example.app.dto.task.TaskUpdateForAssigneeDTO;
 import com.example.app.services.TaskService;
 import com.example.app.utils.TaskUtils;
 import jakarta.validation.Valid;
@@ -53,15 +54,23 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isAssigneeOrAdmin(#id, principal)")
+    @PreAuthorize("hasRole('ADMIN')")
     public TaskDTO updateTask(@RequestBody @Valid TaskUpdateDTO updateDTO,
                               @PathVariable Long id) {
         return taskService.updateTask(updateDTO, id);
     }
 
+    @PutMapping("/{id}/assignee-update")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isAssigneeOrAdmin(#id, principal)")
+    public TaskDTO updateTaskForAssignee(@RequestBody @Valid TaskUpdateForAssigneeDTO updateDTO,
+                              @PathVariable Long id) {
+        return taskService.updateTaskForAssignee(updateDTO, id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN') or @taskUtils.isAssigneeOrAdmin(#id, principal)")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
     }

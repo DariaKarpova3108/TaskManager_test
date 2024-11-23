@@ -7,11 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import java.util.List;
 
 @Getter
 @Setter
-public class TaskUpdateDTO {
-
+public class TaskUpdateForAssigneeDTO {
     @NotNull(message = "Название задачи не может быть пустым")
     @Size(max = 50, message = "Название задачи не должно превышать 50 символов")
     @JsonProperty("title")
@@ -25,12 +25,4 @@ public class TaskUpdateDTO {
     @NotNull(message = "Статус задачи не может быть пустым")
     @JsonProperty("status")
     private JsonNullable<String> status;
-
-    @JsonProperty("priority")
-    @NotNull(message = "Приоритет задачи не может быть пуст")
-    private JsonNullable<String> priority;
-
-    @JsonProperty("assignee_id")
-    @NotNull(message = "Исполнитель задачи должен быть указан обязательно")
-    private JsonNullable<Long> assigneeId;
 }
