@@ -32,10 +32,10 @@ public class TaskCommentService {
     public TaskCommentDTO getCommentForTask(Long taskId, Long id) {
         var task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + taskId + " not found"));
-
         var taskComment = commentRepository.findByIdAndTaskId(id, taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task comment with id: " + id +
-                        " not found for task with id:" + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task comment with id: " + id
+                        + " not found for task with id:" + taskId));
+
         return commentMapper.map(taskComment);
     }
 
@@ -54,8 +54,8 @@ public class TaskCommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + taskId + " not found"));
 
         var taskComment = commentRepository.findByIdAndTaskId(id, taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task comment with id: " + id +
-                        " not found for task with id:" + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task comment with id: " + id
+                        + " not found for task with id:" + taskId));
 
         commentMapper.update(updateDTO, taskComment);
         commentRepository.save(taskComment);
@@ -67,8 +67,8 @@ public class TaskCommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + taskId + " not found"));
 
         var taskComment = commentRepository.findByIdAndTaskId(id, taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task comment with id: " + id +
-                        " not found for task with id:" + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task comment with id: " + id
+                        + " not found for task with id:" + taskId));
 
         commentRepository.delete(taskComment);
     }

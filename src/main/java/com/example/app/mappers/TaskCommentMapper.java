@@ -7,7 +7,13 @@ import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.models.TaskComment;
 import com.example.app.models.User;
 import com.example.app.repositories.UserRepository;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(

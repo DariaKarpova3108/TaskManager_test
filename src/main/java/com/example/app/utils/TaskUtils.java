@@ -24,8 +24,8 @@ public class TaskUtils {
         var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + principal.getName()));
 
-        return user.getRoles().stream().anyMatch(role -> role.getRoleName() == RoleName.ADMIN) ||
-                task.getAssignee().getId().equals(user.getId());
+        return user.getRoles().stream().anyMatch(role -> role.getRoleName() == RoleName.ADMIN)
+                || task.getAssignee().getId().equals(user.getId());
     }
 
     public boolean isCommentAuthor(Long commentId, Principal principal) {

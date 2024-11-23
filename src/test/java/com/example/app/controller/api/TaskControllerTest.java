@@ -191,7 +191,6 @@ public class TaskControllerTest {
         updateDTO.setTitle(JsonNullable.of("title2"));
 
         var request = put("/api/tasks/" + taskModel.getId())
-                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO));
 
@@ -212,6 +211,7 @@ public class TaskControllerTest {
 
     @Test
     @Transactional
+    @WithMockUser(roles = {"ADMIN"})
     public void testUpdateTaskForAssignee() throws Exception {
         var newStatus = Instancio.of(modelGenerator.getStatusModel()).create();
         statusRepository.save(newStatus);
@@ -221,7 +221,6 @@ public class TaskControllerTest {
         updateDTO.setStatus(JsonNullable.of(newStatus.getName()));
 
         var request = put("/api/tasks/" + taskModel.getId() + "/assignee-update")
-                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO));
 

@@ -50,7 +50,8 @@ public abstract class UserMapper {
             updateRoles = updateRolesDTO.stream()
                     .map(RoleDTO::getRoleName)
                     .map(roleName -> roleRepository.findByRoleName(roleName)
-                            .orElseThrow(() -> new ResourceNotFoundException("Role with name: " + roleName + " not found")))
+                            .orElseThrow(() -> new ResourceNotFoundException("Role with name: "
+                                    + roleName + " not found")))
                     .collect(Collectors.toSet());
 
         }

@@ -66,7 +66,8 @@ public abstract class TaskMapper {
     @Named("toModelTaskPriority")
     public TaskPriority toModelTaskPriority(String priority) {
         return taskPriorityRepository.findByPriorityName(priority)
-                .orElseThrow(() -> new ResourceNotFoundException("Task priority with name: " + priority + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Task priority with name: "
+                        + priority + " not found"));
     }
 
     @Named("findUserById")

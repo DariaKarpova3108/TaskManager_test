@@ -108,8 +108,7 @@ public class UserControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetUser() throws Exception {
-        var request = get("/api/users/" + userModel.getId())
-                .with(token);
+        var request = get("/api/users/" + userModel.getId());
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
@@ -125,7 +124,7 @@ public class UserControllerTest {
 
     @Test
     @Transactional
-  //  @WithMockUser(roles = {"ADMIN"})
+    @WithMockUser(roles = {"ADMIN", "USER"})
     public void testCreateUser() throws Exception {
         var createDTO = new UserCreateDTO();
         createDTO.setFirstName("lili");
@@ -134,7 +133,6 @@ public class UserControllerTest {
         createDTO.setPassword("qwerty");
 
         var request = post("/api/users")
-                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO));
 

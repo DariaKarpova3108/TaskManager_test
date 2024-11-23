@@ -94,6 +94,7 @@ public class TaskStatusControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testCreateStatus() throws Exception {
         var createDTO = new TaskStatusCreateDTO();
         createDTO.setStatusName("newStatus");
@@ -113,6 +114,7 @@ public class TaskStatusControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testUpdateStatus() throws Exception {
         var updateDTO = new TaskStatusUpdateDTO();
         updateDTO.setStatusName(JsonNullable.of("status2"));
@@ -132,6 +134,7 @@ public class TaskStatusControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testDeleteStatus() throws Exception {
         var request = delete("/api/statuses/" + taskStatusModel.getId());
         mockMvc.perform(request)

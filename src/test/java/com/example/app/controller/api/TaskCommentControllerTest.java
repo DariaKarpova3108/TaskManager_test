@@ -150,6 +150,7 @@ public class TaskCommentControllerTest {
 
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testCreateTaskComment() throws Exception {
         var createDTO = new TaskCommentCreateDTO();
         createDTO.setTitle("newTitle");
@@ -157,7 +158,6 @@ public class TaskCommentControllerTest {
         createDTO.setDescription("text");
 
         var request = post("/api/tasks/" + taskModel.getId() + "/comments")
-                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO));
 
@@ -175,12 +175,12 @@ public class TaskCommentControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testUpdateTaskComment() throws Exception {
         var updateDTO = new TaskCommentUpdateDTO();
         updateDTO.setTitle(JsonNullable.of("updatedTitle"));
 
         var request = put("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId())
-                .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO));
 
@@ -197,9 +197,9 @@ public class TaskCommentControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
     public void testDeleteTaskComment() throws Exception {
-        var request = delete("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId())
-                .with(token);
+        var request = delete("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId());
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
 
