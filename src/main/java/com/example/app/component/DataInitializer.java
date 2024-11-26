@@ -26,6 +26,7 @@ public class DataInitializer {
     private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
+
     public void init() {
         log.info("Initializing data...");
         for (var roleName : RoleName.values()) {
