@@ -58,7 +58,7 @@ public class ModelGenerator {
                 .ignore(Select.field(TaskComment::getAuthor))
                 .ignore(Select.field(TaskComment::getTask))
                 .supply(Select.field(TaskComment::getTitle), () -> faker.name().title())
-                .supply(Select.field(TaskComment::getDescription), () -> faker.lorem().paragraph())
+                .supply(Select.field(TaskComment::getDescription), () -> faker.lorem().word())
                 .toModel();
 
         taskModel = Instancio.of(Task.class)

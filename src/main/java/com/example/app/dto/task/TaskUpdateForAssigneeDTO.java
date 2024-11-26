@@ -5,10 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 @Getter
 @Setter
+@ToString
 public class TaskUpdateForAssigneeDTO {
     @NotNull(message = "Название задачи не может быть пустым")
     @Size(max = 50, message = "Название задачи не должно превышать 50 символов")

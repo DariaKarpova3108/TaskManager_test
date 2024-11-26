@@ -8,6 +8,7 @@ import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.models.Role;
 import com.example.app.models.User;
 import com.example.app.repositories.RoleRepository;
+import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -17,6 +18,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +34,9 @@ public abstract class UserMapper {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Mapping(target = "passwordDigest", source = "password")
     public abstract User map(UserCreateDTO createDTO);
@@ -56,5 +61,19 @@ public abstract class UserMapper {
 
         }
         return updateRoles;
+    }
+
+    @BeforeMapping
+    public void hashPassword(UserCreateDTO user) {
+        var password = user.getPassword();
+        user.setPassword(passwordEncoder.encode(password));
+    }
+
+    @BeforeMapping
+    public void hashPasswordToUpdate(UserUpdateDTO updateDTO, @MappingTarget User user) {
+        if (updateDTO.getPassword() != null && updateDTO.getPassword().isPresent()) {
+            var password = updateDTO.getPassword().get();
+            user.setPasswordDigest(passwordEncoder.encode(password));
+        }
     }
 }
