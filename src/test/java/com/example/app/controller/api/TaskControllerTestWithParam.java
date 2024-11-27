@@ -15,7 +15,7 @@ import com.example.app.repositories.TaskStatusRepository;
 import com.example.app.repositories.UserRepository;
 import com.example.app.util.ModelGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
@@ -39,6 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
+@Slf4j
 public class TaskControllerTestWithParam {
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -70,6 +73,7 @@ public class TaskControllerTestWithParam {
         var defaultRole = roleRepository.findByRoleName(RoleName.USER)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        log.info("Started created model user.....");
         User user = new User();
         user.setFirstName("Lili");
         user.setLastName("Smith");
@@ -77,19 +81,27 @@ public class TaskControllerTestWithParam {
         user.setPasswordDigest("123");
         user.setRoles(new HashSet<>(Set.of(defaultRole)));
         userRepository.save(user);
+        log.info("Successfully saved model user! {}", user);
 
+        log.info("Started created model task priority.....");
         TaskPriority priority = new TaskPriority();
         priority.setPriorityName("High");
         priorityRepository.save(priority);
+        log.info("Successfully saved model user! {}", priority);
 
+        log.info("Started created model task status.....");
         TaskStatus status = new TaskStatus();
         status.setName("in_progress");
         statusRepository.save(status);
+        log.info("Successfully saved model status! {}", status);
 
+        log.info("Started created model task status 2.....");
         TaskStatus status2 = new TaskStatus();
         status2.setName("completed");
         statusRepository.save(status2);
+        log.info("Successfully saved model status 2! {}", status2);
 
+        log.info("Started created model task.....");
         Task taskModel = new Task();
         taskModel.setTitle("task_title1");
         taskModel.setDescription("task_description");
@@ -98,7 +110,9 @@ public class TaskControllerTestWithParam {
         taskModel.setPriority(priority);
         taskModel.setStatus(status);
         taskRepository.save(taskModel);
+        log.info("Successfully saved model task! {}", taskModel);
 
+        log.info("Started created model task 2.....");
         Task taskModel2 = new Task();
         taskModel2.setTitle("task_title2");
         taskModel2.setDescription("task_description2");
@@ -107,29 +121,25 @@ public class TaskControllerTestWithParam {
         taskModel2.setPriority(priority);
         taskModel2.setStatus(status2);
         taskRepository.save(taskModel2);
+        log.info("Successfully saved model task2! {}", taskModel2);
 
+        log.info("Started created model comment.....");
         TaskComment commentModel = new TaskComment();
         commentModel.setAuthor(user);
         commentModel.setTask(taskModel);
         commentModel.setTitle("title_comment");
         commentModel.setDescription("comment_description");
         commentRepository.save(commentModel);
+        log.info("Successfully saved model comment! {}", commentModel);
 
+        log.info("Started created model comment 2.....");
         TaskComment commentModel2 = new TaskComment();
         commentModel2.setAuthor(user);
         commentModel2.setTask(taskModel2);
         commentModel2.setTitle("title_comment");
         commentModel2.setDescription("comment_description");
         commentRepository.save(commentModel2);
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        taskRepository.deleteAll();
-        commentRepository.deleteAll();
-        statusRepository.deleteAll();
-        priorityRepository.deleteAll();
-        userRepository.deleteAll();
+        log.info("Successfully saved model comment! {}", commentModel2);
     }
 
     @Test

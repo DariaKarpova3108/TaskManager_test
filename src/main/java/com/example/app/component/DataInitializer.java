@@ -12,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.HashSet;
-import java.util.Set;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -26,7 +24,7 @@ public class DataInitializer {
     private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
-
+    @Transactional
     public void init() {
         log.info("Initializing data...");
         for (var roleName : RoleName.values()) {
@@ -60,7 +58,7 @@ public class DataInitializer {
             var roleAdmin = roleRepository.findByRoleName(RoleName.ADMIN)
                     .orElseThrow(() -> new ResourceNotFoundException("Role ADMIN not found"));
 
-            savedUser.setRoles(new HashSet<>(Set.of(roleAdmin)));
+            savedUser.getRoles().add(roleAdmin);
             userRepository.save(savedUser);
 
             log.info("Admin role assigned to user {}", savedUser.getEmail());

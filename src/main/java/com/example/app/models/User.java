@@ -59,7 +59,7 @@ public class User implements BaseEntity, UserDetails {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @ManyToMany(cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @NotNull
     @JoinTable(
             name = "user_role",

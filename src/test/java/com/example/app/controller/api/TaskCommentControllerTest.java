@@ -20,7 +20,6 @@ import com.example.app.repositories.UserRepository;
 import com.example.app.util.ModelGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
@@ -34,6 +33,7 @@ import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfig
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
@@ -113,16 +113,9 @@ public class TaskCommentControllerTest {
         token = jwt().jwt(builder -> builder.subject(userModel.getEmail()));
     }
 
-    @AfterEach
-    public void cleanUp() {
-        commentRepository.deleteAll();
-        taskRepository.deleteAll();
-        statusRepository.deleteAll();
-        priorityRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @Test
+    @Transactional
     @WithMockUser(roles = {"ADMIN", "USER"})
     public void testGetListTaskComments() throws Exception {
         var request = get("/api/tasks/" + taskModel.getId() + "/comments");
@@ -137,6 +130,7 @@ public class TaskCommentControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN", "USER"})
+    @Transactional
     public void testGetTaskComment() throws Exception {
         var request = get("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId());
         var result = mockMvc.perform(request)
@@ -151,6 +145,7 @@ public class TaskCommentControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
+    @Transactional
     public void testCreateTaskComment() throws Exception {
         var createDTO = new TaskCommentCreateDTO();
         createDTO.setTitle("newTitle");
@@ -176,6 +171,7 @@ public class TaskCommentControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
+    @Transactional
     public void testUpdateTaskComment() throws Exception {
         var updateDTO = new TaskCommentUpdateDTO();
         updateDTO.setTitle(JsonNullable.of("updatedTitle"));
@@ -198,6 +194,7 @@ public class TaskCommentControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
+    @Transactional
     public void testDeleteTaskComment() throws Exception {
         var request = delete("/api/tasks/" + taskModel.getId() + "/comments/" + commentModel.getId());
         mockMvc.perform(request)

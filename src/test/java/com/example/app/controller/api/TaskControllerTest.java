@@ -51,6 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class TaskControllerTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -130,6 +131,7 @@ public class TaskControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN", "USER"})
+    @Transactional
     public void testGetTask() throws Exception {
         var request = get("/api/tasks/" + taskModel.getId());
         var result = mockMvc.perform(request)
